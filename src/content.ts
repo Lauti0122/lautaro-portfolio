@@ -123,6 +123,39 @@ export const projects: Project[] = [
     side: { src: "/work/turnolab-m.jpg", width: 780, height: 1600, phone: true },
   },
   {
+    slug: "importcuyo",
+    cover: "/covers/importcuyo.jpg",
+    title: "Import Cuyo",
+    kind: "Tienda online de productos importados",
+    client: "Import Cuyo, Mendoza",
+    url: "https://importcuyo.vercel.app/",
+    urlLabel: "importcuyo.vercel.app",
+    summary:
+      "Importadora de tecnología, consolas, audio y hogar que trabaja por encargue. Armamos la tienda con un catálogo de más de 300 productos, precios en dólares y en pesos al día, y un panel para que el equipo cargue todo sin depender de nadie.",
+    points: [
+      "Catálogo con filtros por categoría y marca, buscador y orden",
+      "Precios en dólares con el equivalente en pesos al dólar oficial del día",
+      "Precio en efectivo, en 3 cuotas y en 12 cuotas por cada versión, con recargo por color",
+      "Panel para cargar productos, fotos, versiones y colores",
+      "Encargos que llegan a WhatsApp con el producto y el color ya elegidos",
+    ],
+    stack: ["Next.js", "TypeScript", "Supabase"],
+    shot: "/work/importcuyo-d.jpg",
+    side: {
+      src: "/work/importcuyo-m.jpg",
+      width: 780,
+      height: 1600,
+      phone: true,
+    },
+    facts: [
+      { value: 330, prefix: "+", label: "productos en el catálogo" },
+      {
+        value: 3,
+        label: "precios por versión: efectivo, 3 cuotas y 12 cuotas",
+      },
+    ],
+  },
+  {
     slug: "surtidores",
     cover: "/covers/surtidores.jpg",
     title: "Surtidores",
@@ -211,7 +244,7 @@ export const facts = [
     prefix: "+",
     label: "años programando, desde que me recibí en 2021",
   },
-  { value: 6, label: "productos en producción para clientes y propios" },
+  { value: 7, label: "productos en producción para clientes y propios" },
   {
     value: 700,
     prefix: "+",

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Pantallas táctiles sin mouse: reemplaza a los efectos de hover */
+@custom-variant touch (@media (hover: none) and (pointer: coarse));
+
 @theme inline {
   /* Negro puro y blanco hueso: el color lo ponen las capturas de los proyectos */
   --color-void: #000000;

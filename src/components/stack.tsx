@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { skills } from "../content";
 import { brandColor, darkBrands, Icon, techByName } from "./icons";
 import { RevealRow } from "./motion";
@@ -10,34 +10,38 @@ import type { LogoItem } from "./logo-scene";
 const LogoScene = dynamic(() => import("./logo-scene"), { ssr: false });
 
 // Logo, posición y tamaño de cada pieza flotante. Claude va al centro.
-const LAYOUT: { name: string; at: [number, number, number]; size: number }[] = [
-  { name: "Claude Code", at: [0, 0.1, 0.6], size: 1.55 },
-  { name: "Next.js", at: [-2.6, 1.3, -0.4], size: 1 },
-  { name: "React", at: [2.7, 1.4, -0.2], size: 1.05 },
-  { name: "TypeScript", at: [-4.6, -0.4, -1], size: 0.85 },
-  { name: "NestJS", at: [4.5, -0.5, -0.8], size: 0.95 },
-  { name: "Node.js", at: [-2.2, -1.6, 0.2], size: 0.9 },
-  { name: "PostgreSQL", at: [2.2, -1.7, 0.3], size: 0.95 },
-  { name: "Supabase", at: [-5.6, 1.7, -2], size: 0.75 },
-  { name: "Prisma", at: [5.8, 1.8, -2.2], size: 0.75 },
-  { name: "Tailwind CSS", at: [0.2, 2.3, -1.6], size: 0.8 },
-  { name: "LangChain", at: [-0.4, -2.5, -1.2], size: 0.8 },
-  { name: "n8n", at: [6.3, -1.9, -2.4], size: 0.75 },
-  { name: "MongoDB", at: [-6.3, -1.8, -2.6], size: 0.75 },
-  { name: "GitHub", at: [-3.9, 2.6, -2.8], size: 0.7 },
+// `narrow` es la distribución vertical para celulares.
+type Spot = { at: [number, number, number]; size: number };
+const LAYOUT: { name: string; wide: Spot; narrow: Spot }[] = [
+  { name: "Claude Code", wide: { at: [0, 0.1, 0.6], size: 1.55 }, narrow: { at: [0, 0.2, 0.6], size: 1.25 } },
+  { name: "Next.js", wide: { at: [-2.6, 1.3, -0.4], size: 1 }, narrow: { at: [-1.6, 1.6, -0.4], size: 0.8 } },
+  { name: "React", wide: { at: [2.7, 1.4, -0.2], size: 1.05 }, narrow: { at: [1.6, 1.7, -0.2], size: 0.85 } },
+  { name: "TypeScript", wide: { at: [-4.6, -0.4, -1], size: 0.85 }, narrow: { at: [-2.3, 0.1, -0.8], size: 0.7 } },
+  { name: "NestJS", wide: { at: [4.5, -0.5, -0.8], size: 0.95 }, narrow: { at: [2.3, 0.2, -0.6], size: 0.75 } },
+  { name: "Node.js", wide: { at: [-2.2, -1.6, 0.2], size: 0.9 }, narrow: { at: [-1.4, -1.5, 0.2], size: 0.75 } },
+  { name: "PostgreSQL", wide: { at: [2.2, -1.7, 0.3], size: 0.95 }, narrow: { at: [1.4, -1.5, 0.3], size: 0.75 } },
+  { name: "Supabase", wide: { at: [-5.6, 1.7, -2], size: 0.75 }, narrow: { at: [-2.4, 2.7, -1.6], size: 0.6 } },
+  { name: "Prisma", wide: { at: [5.8, 1.8, -2.2], size: 0.75 }, narrow: { at: [2.4, 2.8, -1.8], size: 0.6 } },
+  { name: "Tailwind CSS", wide: { at: [0.2, 2.3, -1.6], size: 0.8 }, narrow: { at: [0.85, 2.95, -1.2], size: 0.65 } },
+  { name: "LangChain", wide: { at: [-0.4, -2.5, -1.2], size: 0.8 }, narrow: { at: [0, -2.5, -0.8], size: 0.65 } },
+  { name: "n8n", wide: { at: [6.3, -1.9, -2.4], size: 0.75 }, narrow: { at: [2.3, -2.7, -1.6], size: 0.7 } },
+  { name: "MongoDB", wide: { at: [-6.3, -1.8, -2.6], size: 0.75 }, narrow: { at: [-2.3, -2.7, -1.8], size: 0.6 } },
+  { name: "GitHub", wide: { at: [-3.9, 2.6, -2.8], size: 0.7 }, narrow: { at: [-0.85, 2.95, -2.2], size: 0.6 } },
 ];
 
-const ITEMS: LogoItem[] = LAYOUT.map(({ name, at, size }) => ({
+const ITEMS: LogoItem[] = LAYOUT.map(({ name, wide, narrow }) => ({
   name,
   path: techByName[name].path,
   color: `#${techByName[name].hex}`,
   metal: darkBrands.has(name),
-  at,
-  size,
+  at: wide.at,
+  size: wide.size,
+  atNarrow: narrow.at,
+  sizeNarrow: narrow.size,
 }));
 
 const scaleFor = (width: number) =>
-  width < 640 ? 0.55 : width < 1024 ? 0.7 : 1;
+  width < 640 ? 1 : width < 1024 ? 0.7 : 1;
 
 export function Stack() {
   const section = useRef<HTMLElement>(null);
@@ -46,6 +50,12 @@ export function Stack() {
   // la vez llegaron a reiniciar la GPU y dejar el carrusel en blanco
   const [mounted, setMounted] = useState(false);
   const [hovered, setHovered] = useState<LogoItem | null>(null);
+  // Al soltar un logo solo se borra la etiqueta si sigue siendo la suya
+  const onHover = useCallback((item: LogoItem, active: boolean) => {
+    setHovered((current) =>
+      active ? item : current?.name === item.name ? null : current,
+    );
+  }, []);
 
   useEffect(() => {
     const node = section.current;
@@ -83,15 +93,26 @@ export function Stack() {
           {hovered?.name ?? "Pasá el mouse por los logos"}
         </p>
       </div>
-      <div className="relative h-[360px] sm:h-[62svh] sm:min-h-[420px]">
+      <div className="relative h-[460px] sm:h-[62svh] sm:min-h-[420px]">
         {mounted && (
           <LogoScene
             items={ITEMS}
             running={running}
-            onHover={setHovered}
+            onHover={onHover}
             scaleFor={scaleFor}
           />
         )}
+        {/* En celular el nombre aparece sobre la escena al tocar un logo */}
+        <p
+          aria-live="polite"
+          className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-smoke md:hidden"
+        >
+          {hovered ? (
+            <span className="display text-2xl text-bone">{hovered.name}</span>
+          ) : (
+            "Tocá un logo o deslizá para girarlos"
+          )}
+        </p>
       </div>
       {/* Una fila por área, con cada tecnología como etiqueta con su logo */}
       <ul className="mx-auto max-w-[1400px] px-5 pb-24 md:px-10">
@@ -107,7 +128,7 @@ export function Stack() {
                 return (
                   <li
                     key={name}
-                    className="flex items-center gap-2 rounded-full border border-bone/15 px-4 py-2 text-bone/85 transition-colors hover:border-bone/50 hover:text-bone"
+                    className="flex items-center gap-2 rounded-full border border-bone/15 px-4 py-2 text-bone/85 transition-colors hover:border-bone/50 hover:text-bone active:border-bone/60 active:bg-bone/10"
                   >
                     {glyph && (
                       <Icon

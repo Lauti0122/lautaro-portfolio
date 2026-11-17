@@ -10,6 +10,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useEffect, useRef, type ReactNode } from "react";
+import { useTouch } from "./use-touch";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 
@@ -143,15 +144,30 @@ export function Tilt({
   className?: string;
 }) {
   const reduce = useReducedMotion();
+  const touch = useTouch();
+  const box = useRef<HTMLDivElement>(null);
   const x = useSpring(0, { stiffness: 150, damping: 18 });
   const y = useSpring(0, { stiffness: 150, damping: 18 });
   const rotateX = useTransform(y, [-0.5, 0.5], [8, -8]);
   const rotateY = useTransform(x, [-0.5, 0.5], [-10, 10]);
+  // Sin mouse, la inclinación la da el scroll: se endereza al pasar por el centro
+  const { scrollYProgress } = useScroll({
+    target: box,
+    offset: ["start end", "end start"],
+  });
+  const scrollRotate = useTransform(scrollYProgress, [0, 0.5, 1], [12, 0, -12]);
+  const scrollScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 0.92]);
+
+  const style = reduce
+    ? undefined
+    : touch
+      ? { rotateX: scrollRotate, scale: scrollScale }
+      : { rotateX, rotateY };
 
   return (
-    <div className={className} style={{ perspective: 1000 }}>
+    <div ref={box} className={className} style={{ perspective: 1000 }}>
       <motion.div
-        style={reduce ? undefined : { rotateX, rotateY }}
+        style={style}
         onPointerMove={(event) => {
           const box = event.currentTarget.getBoundingClientRect();
           x.set((event.clientX - box.left) / box.width - 0.5);

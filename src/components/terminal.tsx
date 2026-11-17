@@ -25,7 +25,7 @@ const lines: { kind: "prompt" | "step" | "done"; text: string }[] = [
 export function Terminal() {
   const reduce = useReducedMotion();
   return (
-    <div className="overflow-hidden rounded-2xl border border-bone/15 bg-[#0d0d0d] font-mono text-sm md:text-[0.95rem]">
+    <div className="overflow-hidden rounded-2xl border border-bone/15 bg-[#0d0d0d] font-mono text-[0.78rem] sm:text-sm md:text-[0.95rem]">
       <div className="flex items-center gap-3 border-b border-bone/10 px-4 py-3">
         <span className="flex gap-1.5" aria-hidden="true">
           <i className="size-3 rounded-full bg-bone/20" />
@@ -41,7 +41,7 @@ export function Terminal() {
         </span>
       </div>
       <motion.ol
-        className="space-y-3 p-5 leading-relaxed md:p-6"
+        className="space-y-3 p-4 leading-relaxed sm:p-5 md:p-6"
         initial={reduce ? false : "hidden"}
         whileInView="shown"
         viewport={{ once: true, margin: "-60px" }}

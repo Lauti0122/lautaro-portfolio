@@ -231,11 +231,12 @@ function Arc({ control, reduceMotion, onSelect, onGoTo, onHover }: SceneProps) {
     }
   }, [textures, getState]);
 
-  // En pantallas angostas se abre el campo visual para que entre la tarjeta
+  // En pantallas angostas se abre el campo visual para que entre la tarjeta,
+  // casi de borde a borde en un celular vertical
   useEffect(() => {
     const camera = getState().camera as THREE.PerspectiveCamera;
     const aspect = size.width / size.height;
-    const fromWidth = THREE.MathUtils.radToDeg(2 * Math.atan(0.26 / aspect));
+    const fromWidth = THREE.MathUtils.radToDeg(2 * Math.atan(0.225 / aspect));
     camera.fov = Math.max(34, fromWidth);
     camera.updateProjectionMatrix();
   }, [getState, size]);

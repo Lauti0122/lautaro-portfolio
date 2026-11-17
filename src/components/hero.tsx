@@ -25,6 +25,7 @@ import {
 } from "./carousel-config";
 import { glyphs, Icon } from "./icons";
 import { ProjectDetail } from "./project-detail";
+import { useTouch } from "./use-touch";
 
 const CarouselScene = dynamic(() => import("./carousel-scene"), {
   ssr: false,
@@ -84,8 +85,18 @@ export function Hero() {
   const pointerY = useMotionValue(-100);
   const [sceneKey, setSceneKey] = useState(0);
   const [near, setNear] = useState(true);
+  // Pista de "deslizá" en pantallas táctiles, hasta el primer toque
+  const touch = useTouch();
+  const [hintDone, setHintDone] = useState(false);
 
   const loaded = loading >= 100 || !webgl;
+  const showHint = touch && loaded && !hintDone && active === 0 && open === null;
+
+  useEffect(() => {
+    if (!showHint) return;
+    const timer = setTimeout(() => setHintDone(true), 5000);
+    return () => clearTimeout(timer);
+  }, [showHint]);
 
   // Distancia de scroll entre un proyecto y el siguiente
   const stepPx = useCallback(() => {
@@ -210,6 +221,7 @@ export function Hero() {
   }, [running, open, goTo]);
 
   const onPointerDown = (event: React.PointerEvent) => {
+    setHintDone(true);
     if (event.pointerType === "mouse") {
       if (event.button !== 0) return;
       // Sin esto, arrastrar selecciona el canvas y lo pinta del color de selección
@@ -318,6 +330,30 @@ export function Hero() {
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,transparent_50%,#000_100%)]"
           />
 
+          <AnimatePresence>
+            {showHint && (
+              <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-[46%] z-10 flex justify-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="flex items-center gap-3 rounded-full border border-bone/20 bg-void/70 px-5 py-3 text-sm backdrop-blur">
+                  <span className="relative h-3 w-10">
+                    <motion.span
+                      className="absolute top-0 left-0 size-3 rounded-full bg-bone"
+                      animate={reduce ? undefined : { x: [0, 28, 0] }}
+                      transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </span>
+                  Deslizá para ver más proyectos
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-6 p-5 md:p-8">
             <a
               href="#trabajo"
@@ -375,7 +411,7 @@ export function Hero() {
 
           <>
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-6 p-5 pr-24 md:flex-row md:items-end md:justify-between md:p-8 md:pr-32">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-6 p-5 md:flex-row md:items-end md:justify-between md:p-8 md:pr-32">
               <div className="min-w-0">
                 <p className="flex gap-4 text-smoke tabular-nums">
                   <span className="shrink-0">

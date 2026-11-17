@@ -161,7 +161,7 @@ export function Footer() {
                       "--on-brand": item.name === "GitHub" ? "#000" : "#fff",
                     } as React.CSSProperties
                   }
-                  className="group grid size-14 place-items-center rounded-full border border-bone/25 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-(--brand) hover:bg-(--brand) hover:text-(--on-brand) hover:shadow-[0_12px_36px_-8px_var(--brand)] focus-visible:-translate-y-1.5 focus-visible:border-(--brand) focus-visible:bg-(--brand) focus-visible:text-(--on-brand) sm:size-20"
+                  className="group grid size-14 place-items-center rounded-full border border-bone/25 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-(--brand) hover:bg-(--brand) hover:text-(--on-brand) hover:shadow-[0_12px_36px_-8px_var(--brand)] focus-visible:-translate-y-1.5 focus-visible:border-(--brand) focus-visible:bg-(--brand) focus-visible:text-(--on-brand) touch:border-[color-mix(in_srgb,var(--brand)_45%,transparent)] touch:text-(--brand) touch:active:bg-(--brand) touch:active:text-(--on-brand) sm:size-20"
                 >
                   <Icon
                     glyph={item.glyph}
@@ -180,9 +180,11 @@ export function Footer() {
       {/* Nombre gigante que se pierde en el borde */}
       <p
         aria-hidden
-        className="display relative mt-4 -mb-[0.22em] bg-gradient-to-b from-bone/25 to-transparent bg-clip-text text-center text-[19vw] leading-none whitespace-nowrap text-transparent select-none"
+        className="display relative mt-4 -mb-[0.2em] bg-gradient-to-b from-bone/30 to-transparent bg-clip-text text-center text-[25vw] leading-[0.82] text-transparent select-none sm:text-[19vw] sm:leading-none sm:whitespace-nowrap"
       >
-        Lautaro Bua
+        {/* En celular va en dos líneas para que se lea grande */}
+        Lautaro <br className="sm:hidden" />
+        Bua
       </p>
     </footer>
   );
